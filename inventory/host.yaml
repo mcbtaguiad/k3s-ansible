@@ -1,0 +1,21 @@
+# ============================================================================ #
+# Author: Mark Taguiad <marktaguiad@tagsdev.xyz>
+# ============================================================================ #
+
+# ============================================================================ #
+all:
+  hosts:
+    master1:
+      ansible_ssh_host: MASTER_IP
+    worker1:
+      ansible_ssh_host: WORKER_IP
+
+master:
+  hosts:
+    master1:
+      ansible_ssh_host: MASTER_IP
+
+worker:
+  hosts:
+    worker1:
+      ansible_ssh_host: WORKER_IP

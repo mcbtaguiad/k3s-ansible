@@ -1,0 +1,12 @@
+services:
+  app:
+      container_name: ansible
+      image: docker.io/mcbtaguiad/ansible:8.7.0
+      build:
+          context: .
+          dockerfile: ./docker/Dockerfile
+      # entrypoint: tail -f /dev/null
+      restart: always
+      volumes:
+      - "./:/ansible"
+      - "~/.ssh/:/root/.ssh"

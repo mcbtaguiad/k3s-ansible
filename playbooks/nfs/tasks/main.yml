@@ -1,0 +1,69 @@
+---
+# tasks file for csi
+# ============================================================================ #
+- name: Create dir paths
+  become: true
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: a-rwx,a+rx
+  with_items:
+  - /svr/nfs
+# ============================================================================ #
+- name: Install nfs dependecies
+  package:
+    name: "{{ item }}"
+    state: present
+    # update_cache: yes
+  with_items:
+  - nfs-utils
+  when: ansible_os_family == 'RedHat'
+# ============================================================================ #
+- name: Install storage dependecies
+  package:
+    name: "{{ item }}"
+    state: present
+    # update_cache: yes
+  with_items:
+  - nfs-kernel-server
+  - nfs-common
+  when: ansible_os_family == 'Debian'
+# ============================================================================ #
+- name: Make nfs dir open
+  file:
+    path: /srv/nfs
+    mode: u=rwX,g=rwX,o=rwX
+    recurse: yes
+# ============================================================================ #
+- name: Add all IP to exports
+  lineinfile:
+    dest: /etc/exports
+    regexp: '.*{{ item }}$'
+    line: "/srv/nfs {{ hostvars[item].ansible_ssh_host }}(rw,sync,no_root_squash)"
+    state: present
+  #when: hostvars[item].ansible_host is defined
+  with_items: "{{ groups.all }}"
+# ============================================================================ #
+- name: Apply exports
+  shell: exportfs -r
+# ============================================================================ #
+- name: Ensure nfs-server is started
+  systemd:
+    name: "{{ item }}"
+    state: restarted
+    enabled: true
+  with_items:
+  - nfs-server
+  when: ansible_os_family == 'RedHat'
+# ============================================================================ #
+- name: Ensure nfs-server is started
+  systemd:
+    name: "{{ item }}"
+    state: restarted
+    enabled: true
+  with_items:
+  - nfs-kernel-server
+  when: ansible_os_family == 'Debian'
+# ============================================================================ #
